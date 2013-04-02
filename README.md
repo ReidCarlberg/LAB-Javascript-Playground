@@ -5,6 +5,6 @@ I've been playing with Javascript, so I thought I'd put everything together in a
 
 NOTE: this is for demo purposes, is offered as is without warranty.  Do not install into a production org.
 
-[https://login.salesforce.com/packaging/installPackage.apexp?p0=04tE0000000E8GQ](Install into a dev org from this unmanaged package.)
+[Install into a dev org from this unmanaged package.](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tE0000000E8GQ)
 
 If you have an example you'd like to see (or contribute), go for it.
