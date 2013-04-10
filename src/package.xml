@@ -37,28 +37,28 @@
     </types>
     <types>
         <members>Contact.Sortable_Index__c</members>
-        <members>LAB_Mo_Tester_2__c.Account__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Checkbox_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Currency_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Date_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Datetime_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Email_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Geolocation_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Multi_Select_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Number_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Percent_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Phone_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Picklist_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Text_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Text_Area_Long_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Text_Area_Rich_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Text_Encrypted_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_Textarea_1__c</members>
-        <members>LAB_Mo_Tester_2__c.MT2_URL_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.Account__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Checkbox_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Currency_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Date_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Datetime_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Email_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Geolocation_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Multi_Select_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Number_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Percent_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Phone_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Picklist_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Text_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Text_Area_Long_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Text_Area_Rich_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Text_Encrypted_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_Textarea_1__c</members>
+        <members>LABJS_Mo_Tester_2__c.MT2_URL_1__c</members>
         <name>CustomField</name>
     </types>
     <types>
-        <members>LAB_Mo_Tester_2__c</members>
+        <members>LABJS_Mo_Tester_2__c</members>
         <name>CustomObject</name>
     </types>
     <types>
@@ -76,11 +76,11 @@
         <name>Document</name>
     </types>
     <types>
-        <members>LAB_Mo_Tester_2__c-Mo Tester 2 Layout</members>
+        <members>LABJS_Mo_Tester_2__c-Mo Tester 2 Layout</members>
         <name>Layout</name>
     </types>
     <types>
-        <members>LAB_Mo_Tester_2__c.All</members>
+        <members>LABJS_Mo_Tester_2__c.All</members>
         <name>ListView</name>
     </types>
     <types>

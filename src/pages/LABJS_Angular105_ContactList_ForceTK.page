@@ -5,8 +5,6 @@
 	<c:RemoteTK />    
     <script type="text/javascript">
         
-        var allContacts = [];
-        
         function ContactCtrl($scope) {
         	$scope.contacts = [{"Id":"One", "Name":"Name1"}];
         
