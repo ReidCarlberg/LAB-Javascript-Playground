@@ -34,10 +34,7 @@
     </actionOverrides>
     <deploymentStatus>Deployed</deploymentStatus>
     <enableActivities>true</enableActivities>
-<<<<<<< HEAD
-=======
     <enableEnhancedLookup>false</enableEnhancedLookup>
->>>>>>> 553c9307f19993ee706929e797e5de51793f8bb3
     <enableFeeds>false</enableFeeds>
     <enableHistory>true</enableHistory>
     <enableReports>true</enableReports>
