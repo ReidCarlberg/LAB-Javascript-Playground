@@ -2,7 +2,7 @@
     <apex:includeScript value="{!URLFOR($Resource.LABJS_jQuery, 'jquery191/jquery-1.9.1.min.js')}"  />
     <apex:includeScript value="{!URLFOR($Resource.LABJS_ForceTK, 'forcetk20130401/forcetk.js')}"  />
     <apex:includeScript value="{!URLFOR($Resource.LABJS_Angular, 'angular105/angular.min.js')}" />
-	<c:RemoteTK />    
+	<c:LABJS_RemoteTK />    
     <script type="text/javascript">
         
         function ContactCtrl($scope) {

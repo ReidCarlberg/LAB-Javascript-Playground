@@ -34,13 +34,27 @@
     </actionOverrides>
     <deploymentStatus>Deployed</deploymentStatus>
     <enableActivities>true</enableActivities>
-<<<<<<< HEAD
-=======
     <enableEnhancedLookup>false</enableEnhancedLookup>
->>>>>>> 553c9307f19993ee706929e797e5de51793f8bb3
     <enableFeeds>false</enableFeeds>
     <enableHistory>true</enableHistory>
     <enableReports>true</enableReports>
+    <fieldSets>
+        <fullName>details</fullName>
+        <availableFields>
+            <field>MT2_Date_1__c</field>
+            <isRequired>false</isRequired>
+        </availableFields>
+        <description>For Testing.</description>
+        <displayedFields>
+            <field>MT2_Textarea_1__c</field>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <displayedFields>
+            <field>MT2_Phone_1__c</field>
+            <isRequired>false</isRequired>
+        </displayedFields>
+        <label>details</label>
+    </fieldSets>
     <fields>
         <fullName>Account__c</fullName>
         <deleteConstraint>SetNull</deleteConstraint>

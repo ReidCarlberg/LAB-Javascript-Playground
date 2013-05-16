@@ -1,55 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-<<<<<<< HEAD
-	<types>
-		<members>*</members>
-		<name>ApexClass</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>ApexComponent</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>ApexPage</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>ApexTrigger</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomObject</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomPageWebLink</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomSite</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>CustomTab</name>
-	</types>
-	<types>
-		<members>*</members>
-		<name>StaticResource</name>
-	</types>
-	<version>27.0</version>
-</Package>
-=======
-    <fullName>LAB Javascript Playground</fullName>
+    <fullName>LABJS Javascript Playground</fullName>
     <types>
+        <members>LABJS_CodeFriar_TestUtils</members>
+        <members>LABJS_CodeFriar_ngForceController_TEST</members>
         <members>LABJS_SimpleController</members>
         <members>LABJS_SimpleControllerTest</members>
         <members>RemoteTKController</members>
         <members>TestRemoteTKController</members>
+        <members>ngForceController</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>RemoteTK</members>
+        <members>LABJS_RemoteTK</members>
+        <members>LABJS_ngforce</members>
         <name>ApexComponent</name>
     </types>
     <types>
@@ -69,10 +33,11 @@
         <members>LABJS_JQuery191_Sortable</members>
         <members>LABJS_JQueryMobile130</members>
         <members>LABJS_JQueryMobile130_Hello</members>
+        <members>LABJS_ngForceDemo</members>
         <name>ApexPage</name>
     </types>
     <types>
-        <members>LAB_Javascript_Playground</members>
+        <members>LABJS_Javascript_Playground</members>
         <name>CustomApplication</name>
     </types>
     <types>
@@ -107,13 +72,17 @@
         <members>ForceTK</members>
         <members>JQuery_191_Examples</members>
         <members>JQuery_Mobile_130_Examples</members>
-        <members>LABJS_Angular_1_0_5</members>
+        <members>LABJS_AngularJS</members>
         <name>CustomTab</name>
     </types>
     <types>
         <members>LAB_JAVASCRIPT_PLAYGROUND_FOLDER</members>
         <members>LAB_JAVASCRIPT_PLAYGROUND_FOLDER/LAB_JAVASCRIPT_PLAYGROUND.png</members>
         <name>Document</name>
+    </types>
+    <types>
+        <members>LABJS_Mo_Tester_2__c.details</members>
+        <name>FieldSet</name>
     </types>
     <types>
         <members>LABJS_Mo_Tester_2__c-Mo Tester 2 Layout</members>
@@ -130,8 +99,8 @@
         <members>LABJS_ForceTK</members>
         <members>LABJS_jQuery</members>
         <members>LABJS_jQueryMobile</members>
+        <members>LABJS_ngForce</members>
         <name>StaticResource</name>
     </types>
     <version>25.0</version>
 </Package>
->>>>>>> 553c9307f19993ee706929e797e5de51793f8bb3
