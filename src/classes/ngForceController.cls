@@ -1,18 +1,12 @@
 /*
- * Modified Version of RemoteTKController
+ * Not all of these are used in this project, and as such some are commented out to positively
+ * affect code coverage.
  */
-
 global class ngForceController {
 
     public class picklistValues{
         String label {get; set;}
         String value {get; set;}
-    }
-
-    public class Select2Data {
-        String id               {get; set;}
-        String name             {get; set;}
-        String searchName {get; set;}
     }
 
     public class QueryString {
@@ -53,6 +47,77 @@ global class ngForceController {
         
         Map<String, Object> result = new Map<String, Object>();
         result.put('fields', fields);
+        
+        return JSON.serialize(result);
+    }
+
+    @remoteAction
+    public static String bulkCreate(String objtype, String fields) {
+        Schema.SObjectType targetType = Schema.getGlobalDescribe().get(objtype);
+        Map<String, Schema.sObjectField> targetFields = targetType.getDescribe().fields.getMap();
+        if (targetType == null) {
+            return '[{"message":"The requested resource does not exist","errorCode":"NOT_FOUND"}]';
+        }
+        
+        List<sObject> objs = new List<sObject>();
+
+        Map<String, Object> incomingFieldJsonObject = null;
+        try {
+            incomingFieldJsonObject = (Map<String, Object>)JSON.deserializeUntyped(fields);
+        } catch (JSONException je) {
+            return '[{"message":"'+je.getMessage()+'","errorCode":"JSON_PARSER_ERROR"}]';
+        }
+        
+        try {
+            for(String row : incomingFieldJsonObject.keySet()){
+                Map<String,Object> current = (Map<String,Object>) incomingFieldJsonObject.get(row);
+                SObject obj = targetType.newSObject();
+                for(String property : current.keySet()) {
+                    if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Date) {
+                        obj.put(property, Date.valueOf((String)current.get(property)));
+                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.DateTime) {
+                        obj.put(property, DateTime.valueOfGmt((String)current.get(property)));
+                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Percent ||
+                        targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Currency) {
+                        obj.put(property, String.valueOf(current.get(property)) == '' ? null : Decimal.valueOf((String)current.get(property)));
+                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Double) {
+                        obj.put(property, String.valueOf(current.get(property)) == '' ? null : Double.valueOf(current.get(property)));
+                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Integer) {
+                        obj.put(property, Integer.valueOf(current.get(property)));
+                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Boolean) {
+                        obj.put(property, Boolean.valueOf((String) current.get(property)));
+                    } else {
+                        obj.put(property, current.get(property));
+                    }
+                }
+                objs.add(obj);
+            }
+        } catch (SObjectException soe) {
+            return '[{"message":"'+soe.getMessage()+'","errorCode":"INVALID_FIELD"}]';
+        }
+        
+        try {
+            insert objs;
+        } catch (DMLException dmle) {
+            String fieldNames = '';
+            for (String field : dmle.getDmlFieldNames(0)) {
+                if (fieldNames.length() > 0) {
+                    fieldNames += ',';
+                }
+                fieldNames += '"'+field+'"';
+            }
+            return '[{"fields":['+fieldNames+'],"message":"'+dmle.getDmlMessage(0)+'","errorCode":"'+dmle.getDmlType(0).name()+'"}]';
+        }
+        
+        List<Id> rids = new List<Id>();
+        for(sObject o : objs) {
+            rids.add(o.Id);
+        }
+
+        Map<String, Object> result = new Map<String, Object>();
+        result.put('id', rids);
+        result.put('errors', new List<String>());
+        result.put('success', true);
         
         return JSON.serialize(result);
     }
@@ -117,52 +182,6 @@ global class ngForceController {
     }
 
     @remoteAction
-    public static String getQueryResultsAsSelect2Data(String soql) {
-        List<sObject> records;
-        try {
-            records = Database.query(soql);
-        } catch (QueryException qe) {
-            return '[{"message":"'+qe.getMessage()+'","errorCode":"INVALID_QUERY"}]';
-        }
-        List<Select2Data> sData = new List<Select2Data>();
-        for(sObject r : records) {
-            Select2Data s = new Select2Data();
-            s.id = r.id;
-            s.name = (String) r.get('Name');
-            s.searchName = (String) r.get('SearchName__c');
-            sData.add(s);
-        }
-        return JSON.serialize(sData);
-    }
-
-    @remoteAction
-    public static String sObjectKlone(String iId) {
-        Id id = (id) iId; 
-        sObjectType type = id.getSObjectType();
-        Schema.DescribeSObjectResult dr = type.getDescribe();
-        map<String, Schema.SObjectField> fieldMap = dr.fields.getMap(); 
-        String qs = 'SELECT Id';
-        Set<string> querySet = new Set<string>();
-        querySet.addAll(fieldMap.keySet());
-        querySet.remove('id');
-        for(String f : querySet) {
-            qs += ', '+ f;
-        }
-        qs += ' FROM ' + dr.getName() + ' WHERE id = \'' + id + '\' LIMIT 1';
-        sObject toClone = Database.query(qs);
-        sObject cloned = toClone.clone(false,true,false,false);
-        String results;
-        try{
-            upsert cloned;
-            results = cloned.id;
-        } catch (DMLException e) {
-            system.debug(e);
-            results = e.getMessage();
-        }
-        return JSON.serialize(results);
-    }
-
-    @remoteAction
     public static String getObjType(String Id) {
         Id objId = (id) Id;
         Schema.SObjectType token = objId.getSObjectType();
@@ -176,37 +195,15 @@ global class ngForceController {
     @remoteAction
     public static String create(String objtype, String fields) {
         Schema.SObjectType targetType = Schema.getGlobalDescribe().get(objtype);
-        Map<String, Schema.sObjectField> targetFields = targetType.getDescribe().fields.getMap();
         if (targetType == null) {
-            return '[{"message":"The requested resource does not exist","errorCode":"NOT_FOUND"}]';
+            return makeError('The requested resource does not exist', 'NOT_FOUND');
         }
         
         SObject obj = targetType.newSObject();
-        
-        Map<String, Object> fieldMap = null;
-        try {
-            fieldMap = (Map<String, Object>)JSON.deserializeUntyped(fields);
-        } catch (JSONException je) {
-            return '[{"message":"'+je.getMessage()+'","errorCode":"JSON_PARSER_ERROR"}]';
-        }
-        
-        try {
-            for (String key : fieldMap.keySet()) {
-                if (targetFields.get(key).getDescribe().getType() == Schema.DisplayType.Date) {
-                    obj.put(key, Date.valueOf((String)fieldMap.get(key)));
-                } else if (targetFields.get(key).getDescribe().getType() == Schema.DisplayType.Percent ||
-                       targetFields.get(key).getDescribe().getType() == Schema.DisplayType.Currency) {
-                    obj.put(key, String.valueOf(fieldMap.get(key)) == '' ? null : Decimal.valueOf((String)fieldMap.get(key)));
-                } else if (targetFields.get(key).getDescribe().getType() == Schema.DisplayType.Double) {
-                    obj.put(key, String.valueOf(fieldMap.get(key)) == '' ? null : Double.valueOf(fieldMap.get(key)));
-                } else if (targetFields.get(key).getDescribe().getType() == Schema.DisplayType.Integer) {
-                    obj.put(key, Integer.valueOf(fieldMap.get(key)));
-                } else {
-                    obj.put(key, fieldMap.get(key));
-                }
-            }
-        } catch (SObjectException soe) {
-            return '[{"message":"'+soe.getMessage()+'","errorCode":"INVALID_FIELD"}]';
+
+        String error = writeFields(objType, obj, fields);
+        if (error != null) {
+            return error;
         }
         
         try {
@@ -228,73 +225,7 @@ global class ngForceController {
         result.put('success', true);
         
         return JSON.serialize(result);
-    }
-    
-    @remoteAction
-    public static String bulkCreate(String objtype, String fields) {
-        Schema.SObjectType targetType = Schema.getGlobalDescribe().get(objtype);
-        Map<String, Schema.sObjectField> targetFields = targetType.getDescribe().fields.getMap();
-        if (targetType == null) {
-            return '[{"message":"The requested resource does not exist","errorCode":"NOT_FOUND"}]';
-        }
-        
-        List<sObject> objs = new List<sObject>();
 
-        Map<String, Object> incomingFieldJsonObject = null;
-        try {
-            incomingFieldJsonObject = (Map<String, Object>)JSON.deserializeUntyped(fields);
-        } catch (JSONException je) {
-            return '[{"message":"'+je.getMessage()+'","errorCode":"JSON_PARSER_ERROR"}]';
-        }
-        
-        try {
-            for(String row : incomingFieldJsonObject.keySet()){
-                Map<String,Object> current = (Map<String,Object>) incomingFieldJsonObject.get(row);
-                SObject obj = targetType.newSObject();
-                for(String property : current.keySet()) {
-                    if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Date) {
-                        obj.put(property, Date.valueOf((String)current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Percent ||
-                           targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Currency) {
-                        obj.put(property, String.valueOf(current.get(property)) == '' ? null : Decimal.valueOf((String)current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Double) {
-                        obj.put(property, String.valueOf(current.get(property)) == '' ? null : Double.valueOf(current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Integer) {
-                        obj.put(property, Integer.valueOf(current.get(property)));
-                    } else {
-                        obj.put(property, current.get(property));
-                    }
-                }
-                objs.add(obj);
-            }
-        } catch (SObjectException soe) {
-            return '[{"message":"'+soe.getMessage()+'","errorCode":"INVALID_FIELD"}]';
-        }
-        
-        try {
-            insert objs;
-        } catch (DMLException dmle) {
-            String fieldNames = '';
-            for (String field : dmle.getDmlFieldNames(0)) {
-                if (fieldNames.length() > 0) {
-                    fieldNames += ',';
-                }
-                fieldNames += '"'+field+'"';
-            }
-            return '[{"fields":['+fieldNames+'],"message":"'+dmle.getDmlMessage(0)+'","errorCode":"'+dmle.getDmlType(0).name()+'"}]';
-        }
-        
-        List<Id> rids = new List<Id>();
-        for(sObject o : objs) {
-            rids.add(o.Id);
-        }
-
-        Map<String, Object> result = new Map<String, Object>();
-        result.put('id', rids);
-        result.put('errors', new List<String>());
-        result.put('success', true);
-        
-        return JSON.serialize(result);
     }
 
     @remoteAction
@@ -326,14 +257,16 @@ global class ngForceController {
     @remoteAction
     public static String upser(String objtype, String externalIdField, String externalId, String fields) {
         Schema.SObjectType targetType = Schema.getGlobalDescribe().get(objtype);
-        
+        if (targetType == null) {
+            return makeError('The requested resource does not exist', 'NOT_FOUND');
+        }
+
         SObject obj = targetType.newSObject();
         obj.put(externalIdField, externalId);
         
-        Map<String, Object> fieldMap = 
-           (Map<String, Object>)JSON.deserializeUntyped(fields);
-        for (String key : fieldMap.keySet()) {
-            obj.put(key, fieldMap.get(key));
+        String error = writeFields(objType, obj, fields);
+        if (error != null) {
+            return error;
         }
         
         Schema.SObjectField sobjField = targetType.getDescribe().fields.getMap().get(externalIdField);
@@ -430,10 +363,81 @@ global class ngForceController {
         List<List<SObject>> result;        
         try {
             result = Search.query(sosl);
+        } catch (QueryException qe) {
+            return makeError(qe.getMessage(), 'INVALID_SEARCH');
         } catch (SearchException se) {
-            return '[{"message":"'+se.getMessage()+'","errorCode":"INVALID_SEARCH"}]';
+            return makeError(se.getMessage(), 'INVALID_SEARCH');
         }
         
         return JSON.serialize(result);
     }
+
+    /*
+     * Helper Methods
+     */
+    private static String makeError(String message, String errorCode) {
+        JSONGenerator gen = JSON.createGenerator(false);
+        gen.writeStartArray();
+        gen.writeStartObject();
+        gen.writeStringField('message', message);
+        gen.writeStringField('errorCode', errorCode);
+        gen.writeEndObject();
+        gen.writeEndArray();
+        
+        return gen.getAsString();
+    }
+
+    private static String writeFields(String objtype, SObject obj, String fields) {
+        Map<String, Object> fieldMap = null;
+        try {
+            fieldMap = (Map<String, Object>)JSON.deserializeUntyped(fields);
+        } catch (JSONException je) {
+            return makeError(je.getMessage(), 'JSON_PARSER_ERROR');
+        }
+        
+        Schema.SObjectType targetType = Schema.getGlobalDescribe().get(objtype);
+        
+        Map<String, Schema.sObjectField> targetFields = targetType.getDescribe().fields.getMap();
+        
+        try {
+            for (String key : fieldMap.keySet()) {
+                if (targetFields.get(key) == null) {
+                    return '[{"message":"Field '+key+' does not exist on object type '+objtype+'","errorCode":"INVALID_FIELD"}]';
+                }
+                
+                Object value = fieldMap.get(key);
+                Schema.DisplayType valueType = targetFields.get(key).getDescribe().getType();
+                system.debug('####################### Key = ' + key + ' ValueType: ' + valueType);
+                if (value instanceof String && valueType != Schema.DisplayType.String) {
+                    // Coerce an incoming String to the correct type
+                    String svalue = (String)value;
+                    
+                    if (valueType == Schema.DisplayType.Date) {
+                        obj.put(key, Date.valueOf(svalue));
+                    } else if(valueType == Schema.DisplayType.DateTime){
+                        obj.put(key, DateTime.valueOfGmt(svalue));
+                    } else if (valueType == Schema.DisplayType.Percent ||
+                        valueType == Schema.DisplayType.Currency) {
+                        obj.put(key, svalue == '' ? null : Decimal.valueOf(svalue));
+                    } else if (valueType == Schema.DisplayType.Double) {
+                        obj.put(key, svalue == '' ? null : Double.valueOf(svalue));
+                    } else if (valueType == Schema.DisplayType.Integer) {
+                        obj.put(key, Integer.valueOf(svalue));
+                    } else if (valueType == Schema.DisplayType.Base64) {
+                        obj.put(key, Blob.valueOf(svalue));
+                    } else {
+                        obj.put(key, svalue);
+                    }
+                } else {
+                    // Just try putting the incoming value on the object
+                    obj.put(key, value);
+                }
+            }
+        } catch (SObjectException soe) {
+            return makeError(soe.getMessage(), 'INVALID_FIELD');
+        }
+        
+        return null;
+    }
+
 }
