@@ -1,6 +1,5 @@
 @isTest
 public class LABJS_CodeFriar_ngForceController_TEST{
-
     private static String tooLongAccName = 'LOTS OF '+
     'CHARACTERS XXXXXXXXXXXXXXXXXXXXXXXX'+
     'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'+
@@ -311,6 +310,15 @@ public class LABJS_CodeFriar_ngForceController_TEST{
         System.assertNotEquals(null, jsonResult);
         List<Object> result = (List<Object>)JSON.deserializeUntyped(jsonResult);
         System.assertNotEquals(null, result);
+    }
+
+    static testMethod void testBulkCreate(){
+        Map<Integer,Account> js = new Map<Integer,Account>();
+        String fields = '{"0":{"Name":"foo company 1368751413359"},"1":{"Name":"foo company 1368751413440"},"2":{"Name":"foo company 1368751413459"},"3":{"Name":"foo company 1368751413479"},"4":{"Name":"foo company 1368751413497"},"5":{"Name":"foo company 1368751413517"},"6":{"Name":"foo company 1368751413540"},"7":{"Name":"foo company 1368751413559"},"8":{"Name":"foo company 1368751413577"},"9":{"Name":"foo company 1368751413597"}}';
+        String jsonResult = ngForceController.bulkCreate('Account', fields);
+        Map<String, Object> result = (Map<String, Object>)JSON.deserializeUntyped(jsonResult);
+        System.AssertNotEquals(result.get('id'), null);
+        System.AssertEquals(result.get('success'), true);
     }
 
     static testMethod void testCRUD() {

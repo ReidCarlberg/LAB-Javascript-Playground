@@ -54,48 +54,33 @@ global class ngForceController {
     @remoteAction
     public static String bulkCreate(String objtype, String fields) {
         Schema.SObjectType targetType = Schema.getGlobalDescribe().get(objtype);
-        Map<String, Schema.sObjectField> targetFields = targetType.getDescribe().fields.getMap();
         if (targetType == null) {
-            return '[{"message":"The requested resource does not exist","errorCode":"NOT_FOUND"}]';
+            return makeError('The requested resource does not exist', 'NOT_FOUND');
         }
         
+        Map<String, Schema.sObjectField> targetFields = targetType.getDescribe().fields.getMap();
+
         List<sObject> objs = new List<sObject>();
 
         Map<String, Object> incomingFieldJsonObject = null;
         try {
             incomingFieldJsonObject = (Map<String, Object>)JSON.deserializeUntyped(fields);
         } catch (JSONException je) {
-            return '[{"message":"'+je.getMessage()+'","errorCode":"JSON_PARSER_ERROR"}]';
+            return makeError('Unable to deserialize the fields object', 'INVALID_JSON');
         }
         
-        try {
-            for(String row : incomingFieldJsonObject.keySet()){
-                Map<String,Object> current = (Map<String,Object>) incomingFieldJsonObject.get(row);
-                SObject obj = targetType.newSObject();
-                for(String property : current.keySet()) {
-                    if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Date) {
-                        obj.put(property, Date.valueOf((String)current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.DateTime) {
-                        obj.put(property, DateTime.valueOfGmt((String)current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Percent ||
-                        targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Currency) {
-                        obj.put(property, String.valueOf(current.get(property)) == '' ? null : Decimal.valueOf((String)current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Double) {
-                        obj.put(property, String.valueOf(current.get(property)) == '' ? null : Double.valueOf(current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Integer) {
-                        obj.put(property, Integer.valueOf(current.get(property)));
-                    } else if (targetFields.get(property).getDescribe().getType() == Schema.DisplayType.Boolean) {
-                        obj.put(property, Boolean.valueOf((String) current.get(property)));
-                    } else {
-                        obj.put(property, current.get(property));
-                    }
-                }
-                objs.add(obj);
+        for(String row: incomingFieldJsonObject.keySet()){
+            Map<String,Object> current = (Map<String,Object>) incomingFieldJsonObject.get(row);
+            String currentAsJson = JSON.serialize(current);
+            SObject obj = targetType.newSObject();
+            String error = writeFields(objtype, obj, currentAsJson);
+            if(error != null){
+                return error;
             }
-        } catch (SObjectException soe) {
-            return '[{"message":"'+soe.getMessage()+'","errorCode":"INVALID_FIELD"}]';
+
+            objs.add(obj);
         }
-        
+
         try {
             insert objs;
         } catch (DMLException dmle) {
@@ -108,7 +93,7 @@ global class ngForceController {
             }
             return '[{"fields":['+fieldNames+'],"message":"'+dmle.getDmlMessage(0)+'","errorCode":"'+dmle.getDmlType(0).name()+'"}]';
         }
-        
+
         List<Id> rids = new List<Id>();
         for(sObject o : objs) {
             rids.add(o.Id);
